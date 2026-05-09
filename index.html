@@ -126,7 +126,7 @@
 
     .modal {
       width: min(440px, 100%);
-      padding: 24px;
+      padding: 20px;
       border: 1px solid var(--line);
       border-radius: 8px;
       background: rgba(12, 16, 24, 0.82);
@@ -136,9 +136,9 @@
     }
 
     .portrait {
-      width: 124px;
+      width: 100px;
       aspect-ratio: 1;
-      margin: 0 auto 16px;
+      margin: 0 auto 12px;
       border: 3px solid rgba(255, 255, 255, 0.82);
       border-radius: 50%;
       background: #111827;
@@ -147,27 +147,105 @@
     }
 
     .modal h2 {
-      margin: 0 0 8px;
-      font-size: clamp(26px, 7vw, 40px);
+      margin: 0 0 6px;
+      font-size: clamp(22px, 6vw, 32px);
       line-height: 1.05;
       letter-spacing: 0;
     }
 
     .modal p {
-      margin: 0 0 18px;
+      margin: 0 0 12px;
       color: #f8e6d1;
-      font-size: 15px;
-      line-height: 1.6;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .lang-selector {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .lang-btn {
+      padding: 4px 8px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--muted);
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .lang-btn.active {
+      background: var(--accent);
+      color: #07231f;
+      border-color: var(--accent);
+      font-weight: 700;
+    }
+
+    .id-input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--ink);
+      font-size: 16px;
+      text-align: center;
+    }
+
+    .id-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .ranking-box {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      text-align: left;
+    }
+
+    .ranking-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .ranking-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      font-size: 12px;
+      max-height: 100px;
+      overflow-y: auto;
+    }
+
+    .ranking-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 3px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .ranking-item:last-child {
+      border-bottom: 0;
     }
 
     .primary-button {
       width: 100%;
-      min-height: 48px;
+      min-height: 44px;
       border: 0;
       border-radius: 8px;
       color: #07231f;
       background: var(--accent);
-      font-size: 17px;
+      font-size: 16px;
       font-weight: 900;
       cursor: pointer;
       box-shadow: 0 12px 30px rgba(45, 212, 191, 0.24);
@@ -211,11 +289,6 @@
       pointer-events: auto;
     }
 
-    .credit a {
-      color: inherit;
-      text-underline-offset: 3px;
-    }
-
     @media (max-width: 720px) {
       .game-shell {
         min-height: 500px;
@@ -247,56 +320,66 @@
       .touch-button {
         display: block;
       }
-
-      .credit {
-        font-size: 11px;
-      }
     }
   </style>
 </head>
 <body>
   <main class="game-shell">
-    <canvas id="gameCanvas" aria-label="옴 콘나팟 똥피하기 게임"></canvas>
+    <canvas id="gameCanvas" aria-label="Game"></canvas>
 
     <header>
-      <h1>옴 콘나팟 똥피하기</h1>
-      <section class="hud" aria-label="게임 점수판">
+      <h1 id="gameTitle">옴 콘나팟 똥피하기</h1>
+      <section class="hud">
         <div class="hud-item">
-          <span class="hud-label">점수</span>
+          <span class="hud-label" id="labelScore">SCORE</span>
           <span class="hud-value" id="score">0</span>
         </div>
         <div class="hud-item">
-          <span class="hud-label">최고</span>
+          <span class="hud-label" id="labelBest">BEST</span>
           <span class="hud-value" id="best">0</span>
         </div>
         <div class="hud-item">
-          <span class="hud-label">생명</span>
+          <span class="hud-label" id="labelLives">LIVES</span>
           <span class="hud-value" id="lives">3</span>
         </div>
       </section>
     </header>
 
-    <section class="stage" aria-live="polite">
+    <section class="stage">
       <div class="overlay" id="overlay">
         <div class="modal">
-          <img
-            class="portrait"
-            src="https://pbs.twimg.com/media/GTZBGgrbcAAFH_F.jpg"
-            alt="태국 배우 옴 콘나팟"
-          >
+          <img class="portrait" src="https://pbs.twimg.com/media/GTZBGgrbcAAFH_F.jpg" alt="Ohm">
           <h2 id="overlayTitle">준비됐나요?</h2>
-          <p id="overlayText">떨어지는 똥을 피해 오래 버티세요. 방향키, A/D, 드래그, 좌우 버튼으로 움직일 수 있어요.</p>
-          <button class="primary-button" id="startButton" type="button">시작하기</button>
+          <p id="overlayText">떨어지는 똥을 피해 오래 버티세요.</p>
+          
+          <div class="lang-selector" id="langSelector">
+            <button class="lang-btn" data-lang="ko">한국어</button>
+            <button class="lang-btn" data-lang="en">English</button>
+            <button class="lang-btn" data-lang="th">ไทย</button>
+            <button class="lang-btn" data-lang="ja">日本語</button>
+            <button class="lang-btn" data-lang="zh">中文</button>
+            <button class="lang-btn" data-lang="es">Español</button>
+            <button class="lang-btn" data-lang="fr">Français</button>
+            <button class="lang-btn" data-lang="de">Deutsch</button>
+            <button class="lang-btn" data-lang="vi">Tiếng Việt</button>
+            <button class="lang-btn" data-lang="id">Bahasa</button>
+          </div>
+
+          <input type="text" id="playerId" class="id-input" placeholder="Enter ID" maxlength="10">
+          <button class="primary-button" id="startButton" type="button">START</button>
+          
+          <div class="ranking-box">
+            <div class="ranking-title" id="labelRanking">🏆 TOP RANKINGS</div>
+            <ul id="rankingList" class="ranking-list"></ul>
+          </div>
         </div>
       </div>
     </section>
 
     <footer class="controls">
-      <button class="touch-button" id="leftButton" type="button" aria-label="왼쪽으로 이동">&#8592;</button>
-      <p class="credit">
-        Image: 옴 콘나팟 (Ohm Thipakorn)
-      </p>
-      <button class="touch-button" id="rightButton" type="button" aria-label="오른쪽으로 이동">&#8594;</button>
+      <button class="touch-button" id="leftButton" type="button">&#8592;</button>
+      <p class="credit">Image: 옴 콘나팟 (Ohm Thipakorn)</p>
+      <button class="touch-button" id="rightButton" type="button">&#8594;</button>
     </footer>
   </main>
 
@@ -312,37 +395,155 @@
     const startButton = document.getElementById("startButton");
     const leftButton = document.getElementById("leftButton");
     const rightButton = document.getElementById("rightButton");
+    const playerIdInput = document.getElementById("playerId");
+    const rankingListEl = document.getElementById("rankingList");
+    const langSelector = document.getElementById("langSelector");
 
     const ohmImage = new Image();
     ohmImage.crossOrigin = "anonymous";
     ohmImage.src = "https://pbs.twimg.com/media/GTZBGgrbcAAFH_F.jpg";
 
-    const state = {
-      running: false,
-      gameOver: false,
-      score: 0,
-      best: Number(localStorage.getItem("ohmDodgeBest") || 0),
-      lives: 3,
-      width: 0,
-      height: 0,
-      dpr: 1,
-      lastTime: 0,
-      spawnTimer: 0,
-      spawnEvery: 780,
-      move: 0,
-      pointerActive: false,
-      poop: [],
-      sparkles: [],
-      player: {
-        x: 0,
-        y: 0,
-        radius: 36,
-        speed: 470,
-        invincible: 0
+    const i18n = {
+      ko: {
+        title: "옴 콘나팟 똥피하기", score: "점수", best: "최고", lives: "생명", ready: "준비됐나요?",
+        instr: "떨어지는 똥을 피해 오래 버티세요. 방향키, 드래그, 버튼으로 움직입니다.",
+        idPlaceholder: "아이디를 입력하세요", start: "시작하기", ranking: "트로피 랭킹", 
+        noRank: "아직 기록이 없습니다", gameOver: "게임 종료", 
+        goText: "점수 {score}점! 다시 도전해서 옴을 더 오래 지켜주세요.",
+        restart: "다시 시작", alertID: "아이디를 입력해주세요!"
+      },
+      en: {
+        title: "Ohm Dodge Poop", score: "SCORE", best: "BEST", lives: "LIVES", ready: "Ready?",
+        instr: "Avoid falling poop! Move with arrows, drag, or buttons.",
+        idPlaceholder: "Enter ID", start: "START GAME", ranking: "TOP RANKINGS", 
+        noRank: "No rankings yet", gameOver: "GAME OVER", 
+        goText: "Score: {score}! Protect Ohm longer next time.",
+        restart: "RESTART", alertID: "Please enter your ID!"
+      },
+      th: {
+        title: "เกมหลบอึของโอม", score: "คะแนน", best: "สูงสุด", lives: "ชีวิต", ready: "พร้อมไหม?",
+        instr: "หลบอึให้นานที่สุด! เคลื่อนที่ด้วยลูกศร ลาก หรือปุ่ม",
+        idPlaceholder: "ใส่ไอดีของคุณ", start: "เริ่มเกม", ranking: "อันดับสูงสุด", 
+        noRank: "ยังไม่มีอันดับ", gameOver: "จบเกม", 
+        goText: "ได้ {score} คะแนน! พยายามใหม่เพื่อปกป้องโอม",
+        restart: "เล่นอีกครั้ง", alertID: "กรุณาใส่ไอดีของคุณ!"
+      },
+      ja: {
+        title: "オームのうんち避け", score: "スコア", best: "最高", lives: "ライフ", ready: "準備はいい？",
+        instr: "落ちてくるうんちを避けて！矢印、ドラッグ、ボタンで移動。",
+        idPlaceholder: "IDを入力", start: "スタート", ranking: "ランキング", 
+        noRank: "記録がありません", gameOver: "ゲームオーバー", 
+        goText: "スコア {score}点！もう一度挑戦して守りましょう。",
+        restart: "再開", alertID: "IDを入力してください！"
+      },
+      zh: {
+        title: "Ohm 躲避大便", score: "分数", best: "最高", lives: "生命", ready: "准备好了吗？",
+        instr: "躲避掉落的大便！使用箭头、拖动或按钮移动。",
+        idPlaceholder: "输入 ID", start: "开始游戏", ranking: "排行榜", 
+        noRank: "暂无排名", gameOver: "游戏结束", 
+        goText: "分数 {score}！再次尝试以更久地保护 Ohm。",
+        restart: "重新开始", alertID: "请输入您的 ID！"
+      },
+      es: {
+        title: "Ohm Esquiva Caca", score: "Puntaje", best: "Mejor", lives: "Vidas", ready: "¿Listo?",
+        instr: "¡Evita la caca! Muévete con flechas, arrastre o botones.",
+        idPlaceholder: "Ingresar ID", start: "EMPEZAR", ranking: "CLASIFICACIÓN", 
+        noRank: "Sin registros", gameOver: "FIN DEL JUEGO", 
+        goText: "¡Puntaje {score}! Inténtalo de nuevo para proteger a Ohm.",
+        restart: "REINICIAR", alertID: "¡Por favor ingresa tu ID!"
+      },
+      fr: {
+        title: "Ohm Esquive Caca", score: "Score", best: "Meilleur", lives: "Vies", ready: "Prêt ?",
+        instr: "Évitez les crottes ! Utilisez les flèches, glissez ou les boutons.",
+        idPlaceholder: "Entrer ID", start: "COMMENCER", ranking: "CLASSEMENT", 
+        noRank: "Aucun classement", gameOver: "PARTIE TERMINÉE", 
+        goText: "Score {score} ! Réessayez pour protéger Ohm.",
+        restart: "RECOMMENCER", alertID: "Veuillez entrer votre ID !"
+      },
+      de: {
+        title: "Ohm Kacke-Ausweichen", score: "Punkte", best: "Besten", lives: "Leben", ready: "Bereit?",
+        instr: "Weiche der Kacke aus! Bewege dich mit Pfeilen, Ziehen oder Tasten.",
+        idPlaceholder: "ID eingeben", start: "STARTEN", ranking: "RANGLISTE", 
+        noRank: "Keine Einträge", gameOver: "SPIEL VORBEI", 
+        goText: "Punktzahl {score}! Schütze Ohm beim nächsten Mal länger.",
+        restart: "NEUSTART", alertID: "Bitte gib deine ID ein!"
+      },
+      vi: {
+        title: "Ohm Tránh Phân", score: "Điểm", best: "Kỷ lục", lives: "Mạng", ready: "Sẵn sàng?",
+        instr: "Tránh phân rơi! Di chuyển bằng mũi tên, kéo hoặc nút.",
+        idPlaceholder: "Nhập ID", start: "BẮT ĐẦU", ranking: "XẾP HẠNG", 
+        noRank: "Chưa có xếp hạng", gameOver: "TRÒ CHƠI KẾT THÚC", 
+        goText: "Điểm {score}! Thử lại để bảo vệ Ohm lâu hơn.",
+        restart: "THỬ LẠI", alertID: "Vui lòng nhập ID của bạn!"
+      },
+      id: {
+        title: "Ohm Hindari Kotoran", score: "Skor", best: "Terbaik", lives: "Nyawa", ready: "Siap?",
+        instr: "Hindari kotoran! Bergerak dengan panah, seret, atau tombol.",
+        idPlaceholder: "Masukkan ID", start: "MULAI", ranking: "PERINGKAT", 
+        noRank: "Belum ada peringkat", gameOver: "GAME BERAKHIR", 
+        goText: "Skor {score}! Coba lagi untuk melindungi Ohm.",
+        restart: "MULAI LAGI", alertID: "Silakan masukkan ID Anda!"
       }
     };
 
-    bestEl.textContent = state.best;
+    const state = {
+      lang: localStorage.getItem("ohmDodgeLang") || "ko",
+      running: false, gameOver: false, score: 0,
+      best: Number(localStorage.getItem("ohmDodgeBest") || 0),
+      lives: 3, width: 0, height: 0, dpr: 1, lastTime: 0,
+      spawnTimer: 0, spawnEvery: 780, bonusTimer: 0, bonusEvery: 15000,
+      timeElapsed: 0, move: 0, pointerActive: false,
+      poop: [], bonuses: [], sparkles: [],
+      player: { x: 0, y: 0, radius: 36, speed: 470, invincible: 0 }
+    };
+
+    function updateLanguage(newLang) {
+      state.lang = newLang;
+      localStorage.setItem("ohmDodgeLang", newLang);
+      const t = i18n[newLang];
+      document.getElementById("gameTitle").textContent = t.title;
+      document.getElementById("labelScore").textContent = t.score;
+      document.getElementById("labelBest").textContent = t.best;
+      document.getElementById("labelLives").textContent = t.lives;
+      document.getElementById("overlayTitle").textContent = state.gameOver ? t.gameOver : t.ready;
+      document.getElementById("overlayText").textContent = state.gameOver ? t.goText.replace("{score}", Math.floor(state.score)) : t.instr;
+      document.getElementById("playerId").placeholder = t.idPlaceholder;
+      document.getElementById("startButton").textContent = state.gameOver ? t.restart : t.start;
+      document.getElementById("labelRanking").textContent = "🏆 " + t.ranking;
+      
+      document.querySelectorAll(".lang-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.lang === newLang);
+      });
+      updateRankingUI();
+    }
+
+    function getRankings() {
+      const rankings = JSON.parse(localStorage.getItem("ohmRankings") || "[]");
+      return rankings.sort((a, b) => b.score - a.score).slice(0, 5);
+    }
+
+    function saveRanking(id, score) {
+      if (!id) id = state.lang === "ko" ? "익명" : "Anonymous";
+      const rankings = JSON.parse(localStorage.getItem("ohmRankings") || "[]");
+      rankings.push({ id, score: Math.floor(score), date: new Date().toISOString() });
+      localStorage.setItem("ohmRankings", JSON.stringify(rankings));
+    }
+
+    function updateRankingUI() {
+      const rankings = getRankings();
+      rankingListEl.innerHTML = rankings.map((r, i) => \`
+        <li class="ranking-item">
+          <span>\${i + 1}. \${r.id}</span>
+          <span>\${r.score}\${state.lang === "ko" ? "점" : ""}</span>
+        </li>
+      \`).join("") || \`<li class="ranking-item">\${i18n[state.lang].noRank}</li>\`;
+    }
+
+    langSelector.addEventListener("click", (e) => {
+      if (e.target.classList.contains("lang-btn")) {
+        updateLanguage(e.target.dataset.lang);
+      }
+    });
 
     function resize() {
       state.dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -350,8 +551,8 @@
       state.height = window.innerHeight;
       canvas.width = Math.floor(state.width * state.dpr);
       canvas.height = Math.floor(state.height * state.dpr);
-      canvas.style.width = `${state.width}px`;
-      canvas.style.height = `${state.height}px`;
+      canvas.style.width = \`\${state.width}px\`;
+      canvas.style.height = \`\${state.height}px\`;
       ctx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
       state.player.radius = Math.max(30, Math.min(46, state.width * 0.075));
       state.player.y = state.height - Math.max(88, state.player.radius + 42);
@@ -359,228 +560,181 @@
     }
 
     function startGame() {
-      state.running = true;
-      state.gameOver = false;
-      state.score = 0;
-      state.lives = 3;
-      state.spawnTimer = 0;
-      state.spawnEvery = 780;
-      state.poop = [];
-      state.sparkles = [];
-      state.player.x = state.width / 2;
-      state.player.invincible = 900;
+      if (!playerIdInput.value.trim()) {
+        alert(i18n[state.lang].alertID);
+        return;
+      }
+      state.running = true; state.gameOver = false; state.score = 0; state.lives = 3;
+      state.spawnTimer = 0; state.spawnEvery = 780; state.bonusTimer = 0; state.timeElapsed = 0;
+      state.poop = []; state.bonuses = []; state.sparkles = [];
+      state.player.x = state.width / 2; state.player.invincible = 900;
       state.lastTime = performance.now();
-      scoreEl.textContent = "0";
-      livesEl.textContent = "3";
+      scoreEl.textContent = "0"; livesEl.textContent = "3";
       overlay.hidden = true;
       requestAnimationFrame(loop);
     }
 
     function endGame() {
-      state.running = false;
-      state.gameOver = true;
+      state.running = false; state.gameOver = true;
+      saveRanking(playerIdInput.value.trim(), state.score);
+      updateLanguage(state.lang);
+
       if (state.score > state.best) {
-        state.best = state.score;
+        state.best = Math.floor(state.score);
         localStorage.setItem("ohmDodgeBest", String(state.best));
         bestEl.textContent = state.best;
       }
-      overlayTitle.textContent = "게임 종료";
-      overlayText.textContent = `점수 ${state.score}점! 다시 도전해서 옴을 더 오래 지켜주세요.`;
-      startButton.textContent = "다시 시작";
       overlay.hidden = false;
     }
 
     function spawnPoop() {
       const size = 26 + Math.random() * 22;
-      const speedBoost = Math.min(250, state.score * 2.2);
+      const diffMult = 1 + (state.timeElapsed / 30000); 
+      const speedBoost = Math.min(400, (state.score * 1.5) + (state.timeElapsed * 0.01));
       state.poop.push({
         x: size + Math.random() * (state.width - size * 2),
-        y: -size,
-        size,
-        speed: 180 + Math.random() * 170 + speedBoost,
-        wobble: Math.random() * Math.PI * 2,
-        spin: (Math.random() - 0.5) * 2.4,
-        rotation: 0
+        y: -size, size,
+        speed: (180 + Math.random() * 170 + speedBoost) * diffMult,
+        wobble: Math.random() * Math.PI * 2, spin: (Math.random() - 0.5) * 2.4, rotation: 0
       });
     }
 
-    function addSparkle(x, y) {
+    function spawnBonus() {
+      const size = 30;
+      state.bonuses.push({
+        x: size + Math.random() * (state.width - size * 2),
+        y: -size, size, speed: 150 + Math.random() * 100, symbol: "🛡️"
+      });
+    }
+
+    function addSparkle(x, y, color = "#2dd4bf") {
       for (let i = 0; i < 14; i += 1) {
         state.sparkles.push({
-          x,
-          y,
-          vx: (Math.random() - 0.5) * 260,
-          vy: (Math.random() - 0.5) * 260,
-          life: 420 + Math.random() * 260,
-          maxLife: 680,
-          color: Math.random() > 0.5 ? "#2dd4bf" : "#ffd166"
+          x, y, vx: (Math.random() - 0.5) * 260, vy: (Math.random() - 0.5) * 260,
+          life: 420 + Math.random() * 260, maxLife: 680, color: Math.random() > 0.5 ? color : "#ffd166"
         });
       }
     }
 
     function update(dt) {
-      state.score += Math.floor(dt * 0.018);
-      scoreEl.textContent = state.score;
-      state.spawnEvery = Math.max(260, 780 - state.score * 2.2);
+      state.timeElapsed += dt;
+      const tBonus = 1 + Math.floor(state.timeElapsed / 10000) * 0.5;
+      state.score += (dt * 0.02) * tBonus;
+      scoreEl.textContent = Math.floor(state.score);
+      state.spawnEvery = Math.max(200, 780 - (state.score * 1.8) - (state.timeElapsed * 0.005));
       state.spawnTimer += dt;
-
-      while (state.spawnTimer > state.spawnEvery) {
-        state.spawnTimer -= state.spawnEvery;
-        spawnPoop();
-      }
-
-      if (state.move !== 0) {
-        state.player.x += state.move * state.player.speed * (dt / 1000);
-      }
+      while (state.spawnTimer > state.spawnEvery) { state.spawnTimer -= state.spawnEvery; spawnPoop(); }
+      state.bonusTimer += dt;
+      if (state.bonusTimer > state.bonusEvery) { state.bonusTimer = 0; spawnBonus(); }
+      if (state.move !== 0) { state.player.x += state.move * state.player.speed * (dt / 1000); }
       state.player.x = Math.min(Math.max(state.player.x, state.player.radius), state.width - state.player.radius);
       state.player.invincible = Math.max(0, state.player.invincible - dt);
-
       for (const item of state.poop) {
-        item.y += item.speed * (dt / 1000);
-        item.wobble += dt / 260;
-        item.rotation += item.spin * (dt / 1000);
-        item.x += Math.sin(item.wobble) * 0.8;
+        item.y += item.speed * (dt / 1000); item.wobble += dt / 260;
+        item.rotation += item.spin * (dt / 1000); item.x += Math.sin(item.wobble) * 0.8;
       }
-
       state.poop = state.poop.filter((item) => item.y < state.height + item.size);
-
+      for (const item of state.bonuses) { item.y += item.speed * (dt / 1000); }
+      state.bonuses = state.bonuses.filter((item) => item.y < state.height + item.size);
       for (const item of state.poop) {
-        const dx = item.x - state.player.x;
-        const dy = item.y - state.player.y;
-        const hitDistance = state.player.radius * 0.74 + item.size * 0.42;
-        if (state.player.invincible <= 0 && Math.hypot(dx, dy) < hitDistance) {
-          item.y = state.height + item.size;
-          state.lives -= 1;
-          livesEl.textContent = state.lives;
-          state.player.invincible = 1150;
-          addSparkle(state.player.x, state.player.y);
-          if (state.lives <= 0) {
-            endGame();
-          }
+        const dx = item.x - state.player.x; const dy = item.y - state.player.y;
+        const hitDist = state.player.radius * 0.74 + item.size * 0.42;
+        if (state.player.invincible <= 0 && Math.hypot(dx, dy) < hitDist) {
+          item.y = state.height + item.size; state.lives -= 1;
+          livesEl.textContent = state.lives; state.player.invincible = 1500;
+          addSparkle(state.player.x, state.player.y, "#ff6b6b");
+          if (state.lives <= 0) endGame();
           break;
         }
       }
-
+      for (const item of state.bonuses) {
+        const dx = item.x - state.player.x; const dy = item.y - state.player.y;
+        const hitDist = state.player.radius + item.size;
+        if (Math.hypot(dx, dy) < hitDist) {
+          item.y = state.height + item.size; state.player.invincible = 3000;
+          addSparkle(state.player.x, state.player.y, "#2dd4bf");
+        }
+      }
       for (const sparkle of state.sparkles) {
-        sparkle.x += sparkle.vx * (dt / 1000);
-        sparkle.y += sparkle.vy * (dt / 1000);
-        sparkle.vy += 220 * (dt / 1000);
-        sparkle.life -= dt;
+        sparkle.x += sparkle.vx * (dt / 1000); sparkle.y += sparkle.vy * (dt / 1000);
+        sparkle.vy += 220 * (dt / 1000); sparkle.life -= dt;
       }
       state.sparkles = state.sparkles.filter((sparkle) => sparkle.life > 0);
     }
 
     function drawBackground() {
       ctx.clearRect(0, 0, state.width, state.height);
-
-      ctx.save();
-      ctx.globalAlpha = 0.22;
-      ctx.fillStyle = "#ffffff";
+      ctx.save(); ctx.globalAlpha = 0.22; ctx.fillStyle = "#ffffff";
       for (let i = 0; i < 34; i += 1) {
         const x = (i * 137 + state.score * 0.4) % state.width;
         const y = (i * 89) % state.height;
-        ctx.beginPath();
-        ctx.arc(x, y, 1.2 + (i % 4), 0, Math.PI * 2);
-        ctx.fill();
+        ctx.beginPath(); ctx.arc(x, y, 1.2 + (i % 4), 0, Math.PI * 2); ctx.fill();
       }
       ctx.restore();
-
       const floor = ctx.createLinearGradient(0, state.height - 150, 0, state.height);
-      floor.addColorStop(0, "rgba(255,255,255,0)");
-      floor.addColorStop(1, "rgba(0,0,0,0.28)");
-      ctx.fillStyle = floor;
-      ctx.fillRect(0, state.height - 150, state.width, 150);
+      floor.addColorStop(0, "rgba(255,255,255,0)"); floor.addColorStop(1, "rgba(0,0,0,0.28)");
+      ctx.fillStyle = floor; ctx.fillRect(0, state.height - 150, state.width, 150);
     }
 
     function drawPlayer() {
-      const player = state.player;
+      const player = state.player; const isGuarded = player.invincible > 1500;
       const blink = player.invincible > 0 && Math.floor(performance.now() / 95) % 2 === 0;
-
-      ctx.save();
-      ctx.translate(player.x, player.y);
-      ctx.shadowColor = "rgba(0, 0, 0, 0.42)";
-      ctx.shadowBlur = 22;
-      ctx.shadowOffsetY = 12;
-
-      ctx.beginPath();
-      ctx.arc(0, 0, player.radius + 8, 0, Math.PI * 2);
-      ctx.fillStyle = blink ? "rgba(255, 107, 107, 0.72)" : "rgba(45, 212, 191, 0.82)";
-      ctx.fill();
-
-      ctx.beginPath();
-      ctx.arc(0, 0, player.radius, 0, Math.PI * 2);
-      ctx.clip();
-
+      ctx.save(); ctx.translate(player.x, player.y);
+      if (player.invincible > 0) {
+        ctx.beginPath(); ctx.arc(0, 0, player.radius + 15, 0, Math.PI * 2);
+        ctx.strokeStyle = isGuarded ? "rgba(45, 212, 191, 0.6)" : "rgba(255, 107, 107, 0.4)";
+        ctx.lineWidth = 4; ctx.setLineDash([5, 5]); ctx.stroke();
+      }
+      ctx.shadowColor = "rgba(0, 0, 0, 0.42)"; ctx.shadowBlur = 22; ctx.shadowOffsetY = 12;
+      ctx.beginPath(); ctx.arc(0, 0, player.radius + 8, 0, Math.PI * 2);
+      ctx.fillStyle = blink ? "rgba(255, 107, 107, 0.72)" : "rgba(45, 212, 191, 0.82)"; ctx.fill();
+      ctx.beginPath(); ctx.arc(0, 0, player.radius, 0, Math.PI * 2); ctx.clip();
       if (ohmImage.complete && ohmImage.naturalWidth) {
         const scale = Math.max((player.radius * 2) / ohmImage.width, (player.radius * 2) / ohmImage.height);
-        const w = ohmImage.width * scale;
-        const h = ohmImage.height * scale;
+        const w = ohmImage.width * scale; const h = ohmImage.height * scale;
         ctx.drawImage(ohmImage, -w / 2, -h / 2, w, h);
       } else {
-        ctx.fillStyle = "#111827";
-        ctx.fillRect(-player.radius, -player.radius, player.radius * 2, player.radius * 2);
-        ctx.fillStyle = "#fffaf2";
-        ctx.font = `900 ${player.radius * 0.58}px sans-serif`;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText("OHM", 0, 2);
+        ctx.fillStyle = "#111827"; ctx.fillRect(-player.radius, -player.radius, player.radius * 2, player.radius * 2);
+        ctx.fillStyle = "#fffaf2"; ctx.font = \`900 \${player.radius * 0.58}px sans-serif\`;
+        ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("OHM", 0, 2);
       }
       ctx.restore();
-
-      ctx.save();
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.82)";
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.arc(player.x, player.y, player.radius + 1.5, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.restore();
+      ctx.save(); ctx.strokeStyle = "rgba(255, 255, 255, 0.82)"; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(player.x, player.y, player.radius + 1.5, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
     }
 
     function drawPoop() {
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
       for (const item of state.poop) {
-        ctx.save();
-        ctx.translate(item.x, item.y);
-        ctx.rotate(item.rotation);
-        ctx.font = `${item.size}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
-        ctx.fillText("💩", 0, 0);
-        ctx.restore();
+        ctx.save(); ctx.translate(item.x, item.y); ctx.rotate(item.rotation);
+        ctx.font = \`\${item.size}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif\`;
+        ctx.fillText("💩", 0, 0); ctx.restore();
+      }
+    }
+
+    function drawBonuses() {
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      for (const item of state.bonuses) {
+        ctx.save(); ctx.translate(item.x, item.y); ctx.font = \`\${item.size}px sans-serif\`;
+        ctx.fillText(item.symbol, 0, 0); ctx.restore();
       }
     }
 
     function drawSparkles() {
       for (const sparkle of state.sparkles) {
         const alpha = Math.max(0, sparkle.life / sparkle.maxLife);
-        ctx.save();
-        ctx.globalAlpha = alpha;
-        ctx.fillStyle = sparkle.color;
-        ctx.beginPath();
-        ctx.arc(sparkle.x, sparkle.y, 3.5, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
+        ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = sparkle.color;
+        ctx.beginPath(); ctx.arc(sparkle.x, sparkle.y, 3.5, 0, Math.PI * 2); ctx.fill(); ctx.restore();
       }
     }
 
-    function draw() {
-      drawBackground();
-      drawPoop();
-      drawSparkles();
-      drawPlayer();
-    }
+    function draw() { drawBackground(); drawPoop(); drawBonuses(); drawSparkles(); drawPlayer(); }
 
     function loop(now) {
-      if (!state.running) {
-        draw();
-        return;
-      }
-      const dt = Math.min(32, now - state.lastTime);
-      state.lastTime = now;
-      update(dt);
-      draw();
-      if (state.running) {
-        requestAnimationFrame(loop);
-      }
+      if (!state.running) { draw(); return; }
+      const dt = Math.min(32, now - state.lastTime); state.lastTime = now;
+      update(dt); draw();
+      if (state.running) requestAnimationFrame(loop);
     }
 
     function setPointerPosition(clientX) {
@@ -588,67 +742,26 @@
     }
 
     window.addEventListener("resize", resize);
-    window.addEventListener("keydown", (event) => {
-      if (event.key === "ArrowLeft" || event.key.toLowerCase() === "a") {
-        state.move = -1;
-      }
-      if (event.key === "ArrowRight" || event.key.toLowerCase() === "d") {
-        state.move = 1;
-      }
-      if ((event.key === " " || event.key === "Enter") && !state.running) {
-        startGame();
-      }
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowLeft" || e.key.toLowerCase() === "a") state.move = -1;
+      if (e.key === "ArrowRight" || e.key.toLowerCase() === "d") state.move = 1;
+      if ((e.key === " " || e.key === "Enter") && !state.running) startGame();
     });
-
-    window.addEventListener("keyup", (event) => {
-      if ((event.key === "ArrowLeft" || event.key.toLowerCase() === "a") && state.move < 0) {
-        state.move = 0;
-      }
-      if ((event.key === "ArrowRight" || event.key.toLowerCase() === "d") && state.move > 0) {
-        state.move = 0;
-      }
+    window.addEventListener("keyup", (e) => {
+      if ((e.key === "ArrowLeft" || e.key.toLowerCase() === "a") && state.move < 0) state.move = 0;
+      if ((e.key === "ArrowRight" || e.key.toLowerCase() === "d") && state.move > 0) state.move = 0;
     });
-
-    window.addEventListener("pointerdown", (event) => {
-      state.pointerActive = true;
-      setPointerPosition(event.clientX);
-    });
-
-    window.addEventListener("pointermove", (event) => {
-      if (state.pointerActive) {
-        setPointerPosition(event.clientX);
-      }
-    });
-
-    window.addEventListener("pointerup", () => {
-      state.pointerActive = false;
-    });
-
-    leftButton.addEventListener("pointerdown", (event) => {
-      event.stopPropagation();
-      state.move = -1;
-    });
-    rightButton.addEventListener("pointerdown", (event) => {
-      event.stopPropagation();
-      state.move = 1;
-    });
-    leftButton.addEventListener("pointerup", () => {
-      state.move = 0;
-    });
-    rightButton.addEventListener("pointerup", () => {
-      state.move = 0;
-    });
-    leftButton.addEventListener("pointerleave", () => {
-      state.move = 0;
-    });
-    rightButton.addEventListener("pointerleave", () => {
-      state.move = 0;
-    });
-
+    window.addEventListener("pointerdown", (e) => { state.pointerActive = true; setPointerPosition(e.clientX); });
+    window.addEventListener("pointermove", (e) => { if (state.pointerActive) setPointerPosition(e.clientX); });
+    window.addEventListener("pointerup", () => { state.pointerActive = false; });
+    leftButton.addEventListener("pointerdown", (e) => { e.stopPropagation(); state.move = -1; });
+    rightButton.addEventListener("pointerdown", (e) => { e.stopPropagation(); state.move = 1; });
+    leftButton.addEventListener("pointerup", () => state.move = 0);
+    rightButton.addEventListener("pointerup", () => state.move = 0);
     startButton.addEventListener("click", startGame);
 
     resize();
-    draw();
+    updateLanguage(state.lang);
   </script>
 </body>
 </html>
