@@ -121,8 +121,8 @@
     const i18n = {
       ko: { title: "옴 콘나팟 똥피하기", score: "점수", best: "최고", lives: "생명", ready: "준비됐나요?", instr: "떨어지는 똥을 피해 오래 버티세요.", placeholder: "아이디 입력", start: "시작하기", ranking: "랭킹", noRank: "기록 없음", gameOver: "게임 종료", goText: "{score}점! 옴을 더 지켜주세요.", restart: "다시 시작", alertID: "아이디를 입력하세요!" },
       en: { title: "Ohm Dodge Poop", score: "SCORE", best: "BEST", lives: "LIVES", ready: "Ready?", instr: "Avoid falling poop!", placeholder: "Enter ID", start: "START", ranking: "RANKINGS", noRank: "No records", gameOver: "GAME OVER", goText: "Score: {score}! Protect Ohm!", restart: "RESTART", alertID: "Enter your ID!" },
-      th: { title: "게임หลบอึของโอม", score: "คะแนน", best: "สูงสุด", lives: "ชีวิต", ready: "พร้อมไหม?", instr: "หลบอึให้นานที่สุด!", placeholder: "ใส่ไอดี", start: "เริ่ม게임", ranking: "อันดับ", noRank: "ไม่มีอันดับ", gameOver: "จบ게임", goText: "{score} คะแนน! พยายามใหม่", restart: "เล่นอีกครั้ง", alertID: "กรุณาใส่ไอดี!" },
-      ja: { title: "オームのうんち避け", score: "スコア", best: "最高", lives: "ライフ", ready: "準備はいい？", instr: "落ちてくるうんちを避けて！", placeholder: "ID入力", start: "スタート", ranking: "ランキング", noRank: "記録なし", gameOver: "ゲームオーバー", goText: "スコア: {score}点！", restart: "再開", alertID: "IDを入力してください！" },
+      th: { title: "เกมหลบอึของโอม", score: "คะแนน", best: "สูงสุด", lives: "ชีวิต", ready: "พร้อมไหม?", instr: "หลบอึให้นานที่สุดเท่าที่จะทำได้", placeholder: "ใส่ไอดี", start: "เริ่มเกม", ranking: "อันดับ", noRank: "ไม่มีอันดับ", gameOver: "จบเกม", goText: "{score} คะแนน! พยายามใหม่นะ", restart: "เล่นอีกครั้ง", alertID: "กรุณาใส่ไอดี!" },
+      ja: { title: "オームのうんち避け", score: "スコア", best: "最高", lives: "ライフ", ready: "準備はいい？", instr: "落ちてくるうんちを避けて！", placeholder: "ID입력", start: "スタート", ranking: "ランキング", noRank: "記録なし", gameOver: "ゲームオーバー", goText: "スコア: {score}점！", restart: "再開", alertID: "IDを入力してください！" },
       zh: { title: "Ohm 躲避大便", score: "分数", best: "最高", lives: "生命", ready: "准备好了吗？", instr: "躲避掉落的大便！", placeholder: "输入 ID", start: "开始", ranking: "排行榜", noRank: "暂无排名", gameOver: "游戏结束", goText: "分数: {score}！", restart: "重新开始", alertID: "请输入 ID！" },
       es: { title: "Ohm Esquiva Caca", score: "Puntaje", best: "Mejor", lives: "Vidas", ready: "¿Listo?", instr: "¡Evita la caca!", placeholder: "Ingresar ID", start: "EMPEZAR", ranking: "RANKING", noRank: "Sin registros", gameOver: "FIN", goText: "¡Puntaje {score}!", restart: "REINICIAR", alertID: "¡Ingresa tu ID!" },
       fr: { title: "Ohm Esquive Caca", score: "Score", best: "Meilleur", lives: "Vies", ready: "Prêt ?", instr: "Évitez les crottes !", placeholder: "Entrer ID", start: "COMMENCER", ranking: "CLASSEMENT", noRank: "Aucun", gameOver: "FIN", goText: "Score: {score} !", restart: "RECOMMENCER", alertID: "Entrez votre ID !" },
@@ -158,9 +158,11 @@
       document.getElementById('ui-ranking-label').textContent = "🏆 " + t.ranking;
       document.getElementById('ui-best').textContent = state.best;
       
-      document.querySelectorAll('.lang-btn').forEach(btn => {
+      const langBtns = document.querySelectorAll('.lang-btn');
+      for (let i = 0; i < langBtns.length; i++) {
+        const btn = langBtns[i];
         btn.classList.toggle('active', btn.dataset.lang === state.lang);
-      });
+      }
 
       const rankings = JSON.parse(localStorage.getItem('ohmRankings') || '[]');
       const top5 = rankings.sort((a,b) => b.score - a.score).slice(0, 5);
@@ -183,14 +185,16 @@
       const size = 26 + Math.random() * 20;
       const speedMult = 1 + (state.timeElapsed / 30000);
       state.poop.push({
-        x: Math.random() * (state.width - size), y: -size, size,
+        x: Math.random() * (state.width - size),
+        y: -size, size,
         speed: (180 + Math.random() * 150) * speedMult,
         rotation: 0, spin: (Math.random() - 0.5) * 0.1
       });
     }
 
     function spawnBonus() {
-      state.bonuses.push({ x: Math.random() * (state.width - 30), y: -30, size: 30, speed: 150 });
+      const size = 30;
+      state.bonuses.push({ x: Math.random() * (state.width - size), y: -size, size, speed: 150 });
     }
 
     function update(dt) {
@@ -211,8 +215,11 @@
 
       state.poop.forEach(p => { p.y += p.speed * (dt / 1000); p.rotation += p.spin; });
       state.poop = state.poop.filter(p => {
-        const dx = p.x - state.player.x; const dy = p.y - state.player.y;
-        if (state.player.invincible <= 0 && Math.hypot(dx, dy) < (state.player.radius + p.size/2) * 0.8) {
+        const cx = p.x + p.size / 2;
+        const cy = p.y + p.size / 2;
+        const dx = cx - state.player.x;
+        const dy = cy - state.player.y;
+        if (state.player.invincible <= 0 && Math.hypot(dx, dy) < (state.player.radius + p.size / 2) * 0.8) {
           state.lives--; document.getElementById('ui-lives').textContent = state.lives;
           state.player.invincible = 1500; if (state.lives <= 0) endGame(); return false;
         }
@@ -221,26 +228,44 @@
 
       state.bonuses.forEach(b => { b.y += b.speed * (dt / 1000); });
       state.bonuses = state.bonuses.filter(b => {
-        const dx = b.x - state.player.x; const dy = b.y - state.player.y;
-        if (Math.hypot(dx, dy) < state.player.radius + b.size) { state.player.invincible = 3000; return false; }
+        const cx = b.x + b.size / 2;
+        const cy = b.y + b.size / 2;
+        const dx = cx - state.player.x;
+        const dy = cy - state.player.y;
+        if (Math.hypot(dx, dy) < state.player.radius + b.size / 2) { state.player.invincible = 3000; return false; }
         return b.y < state.height + 50;
       });
     }
 
     function draw() {
       ctx.clearRect(0, 0, state.width, state.height);
-      ctx.save(); ctx.translate(state.player.x, state.player.y);
+      
+      ctx.save();
+      ctx.translate(state.player.x, state.player.y);
       if (state.player.invincible > 0) {
-        ctx.beginPath(); ctx.arc(0, 0, state.player.radius + 10, 0, Math.PI*2);
-        ctx.strokeStyle = state.player.invincible > 1500 ? 'cyan' : 'red';
-        ctx.lineWidth = 3; ctx.setLineDash([5,5]); ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(0, 0, state.player.radius + 10, 0, Math.PI * 2);
+        ctx.strokeStyle = state.player.invincible > 1500 ? "cyan" : "red";
+        ctx.lineWidth = 3; ctx.setLineDash([5, 5]); ctx.stroke();
       }
-      ctx.beginPath(); ctx.arc(0, 0, state.player.radius, 0, Math.PI*2); ctx.clip();
-      if (ohmImg.complete) ctx.drawImage(ohmImg, -state.player.radius, -state.player.radius, state.player.radius*2, state.player.radius*2);
+      ctx.beginPath();
+      ctx.arc(0, 0, state.player.radius, 0, Math.PI * 2); ctx.clip();
+      if (ohmImg.complete) ctx.drawImage(ohmImg, -state.player.radius, -state.player.radius, state.player.radius * 2, state.player.radius * 2);
       ctx.restore();
-      ctx.font = "30px Arial"; ctx.textAlign = "center";
-      state.poop.forEach(p => { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rotation); ctx.fillText("💩", 0, 0); ctx.restore(); });
-      state.bonuses.forEach(b => { ctx.fillText("🛡️", b.x, b.y); });
+
+      ctx.font = "30px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      state.poop.forEach(p => {
+        ctx.save();
+        ctx.translate(p.x + p.size / 2, p.y + p.size / 2);
+        ctx.rotate(p.rotation);
+        ctx.fillText("💩", 0, 0);
+        ctx.restore();
+      });
+      state.bonuses.forEach(b => {
+        ctx.fillText("🛡️", b.x + b.size / 2, b.y + b.size / 2);
+      });
     }
 
     function loop(now) {
@@ -270,19 +295,30 @@
       updateUI(); overlay.classList.remove('hidden');
     }
 
-    document.getElementById('lang-selector').addEventListener('click', (e) => { 
-      if (e.target.dataset.lang) { state.lang = e.target.dataset.lang; localStorage.setItem('ohmDodgeLang', state.lang); updateUI(); } 
-    });
+    const langBtns = document.querySelectorAll('.lang-btn');
+    for (let i = 0; i < langBtns.length; i++) {
+      const btn = langBtns[i];
+      btn.addEventListener('click', function() {
+        state.lang = btn.getAttribute('data-lang');
+        localStorage.setItem('ohmDodgeLang', state.lang);
+        updateUI();
+      });
+    }
+    
     startBtn.addEventListener('click', startGame);
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowLeft') state.move = -1; if (e.key === 'ArrowRight') state.move = 1;
+      if (e.key === 'ArrowLeft') state.move = -1;
+      if (e.key === 'ArrowRight') state.move = 1;
       if (e.key === 'Enter' && !state.running) startGame();
     });
     window.addEventListener('keyup', () => state.move = 0);
-    document.getElementById('left-btn').addEventListener('touchstart', (e) => { e.preventDefault(); state.move = -1; });
-    document.getElementById('right-btn').addEventListener('touchstart', (e) => { e.preventDefault(); state.move = 1; });
-    document.getElementById('left-btn').addEventListener('touchend', () => state.move = 0);
-    document.getElementById('right-btn').addEventListener('touchend', () => state.move = 0);
+    
+    const leftBtn = document.getElementById('left-btn');
+    const rightBtn = document.getElementById('right-btn');
+    leftBtn.addEventListener('touchstart', (e) => { e.preventDefault(); state.move = -1; });
+    leftBtn.addEventListener('touchend', () => state.move = 0);
+    rightBtn.addEventListener('touchstart', (e) => { e.preventDefault(); state.move = 1; });
+    rightBtn.addEventListener('touchend', () => state.move = 0);
     
     window.addEventListener('resize', resize);
     resize(); updateUI();
