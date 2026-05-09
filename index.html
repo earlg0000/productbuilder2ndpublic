@@ -1,0 +1,655 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>옴 콘나팟 똥피하기</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #fffaf2;
+      --muted: #f4d9b8;
+      --accent: #2dd4bf;
+      --danger: #ff6b6b;
+      --panel: rgba(19, 24, 33, 0.72);
+      --line: rgba(255, 255, 255, 0.16);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+    }
+
+    body {
+      min-height: 100%;
+      overflow: hidden;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 18% 20%, rgba(45, 212, 191, 0.22), transparent 30%),
+        linear-gradient(140deg, #1d1b24 0%, #334155 42%, #78350f 100%);
+      touch-action: none;
+    }
+
+    .game-shell {
+      position: relative;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      width: 100vw;
+      height: 100dvh;
+      min-height: 560px;
+    }
+
+    header {
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px clamp(18px, 4vw, 42px) 10px;
+      pointer-events: none;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(24px, 4vw, 48px);
+      line-height: 1;
+      letter-spacing: 0;
+      text-shadow: 0 4px 22px rgba(0, 0, 0, 0.34);
+    }
+
+    .hud {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(74px, auto));
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .hud-item {
+      min-width: 74px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+      backdrop-filter: blur(16px);
+      text-align: center;
+    }
+
+    .hud-label {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .hud-value {
+      display: block;
+      margin-top: 2px;
+      font-size: 21px;
+      font-weight: 900;
+    }
+
+    #gameCanvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .stage {
+      position: relative;
+      min-height: 0;
+    }
+
+    .overlay {
+      position: absolute;
+      z-index: 4;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: linear-gradient(rgba(9, 13, 20, 0.1), rgba(9, 13, 20, 0.44));
+    }
+
+    .overlay[hidden] {
+      display: none;
+    }
+
+    .modal {
+      width: min(440px, 100%);
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(12, 16, 24, 0.82);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.36);
+      backdrop-filter: blur(20px);
+      text-align: center;
+    }
+
+    .portrait {
+      width: 124px;
+      aspect-ratio: 1;
+      margin: 0 auto 16px;
+      border: 3px solid rgba(255, 255, 255, 0.82);
+      border-radius: 50%;
+      background: #111827;
+      object-fit: cover;
+      box-shadow: 0 14px 44px rgba(0, 0, 0, 0.38);
+    }
+
+    .modal h2 {
+      margin: 0 0 8px;
+      font-size: clamp(26px, 7vw, 40px);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .modal p {
+      margin: 0 0 18px;
+      color: #f8e6d1;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .primary-button {
+      width: 100%;
+      min-height: 48px;
+      border: 0;
+      border-radius: 8px;
+      color: #07231f;
+      background: var(--accent);
+      font-size: 17px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 12px 30px rgba(45, 212, 191, 0.24);
+    }
+
+    .primary-button:active {
+      transform: translateY(1px);
+    }
+
+    .controls {
+      z-index: 3;
+      display: grid;
+      grid-template-columns: 64px 1fr 64px;
+      align-items: end;
+      gap: 12px;
+      padding: 0 clamp(18px, 4vw, 42px) 18px;
+      pointer-events: none;
+    }
+
+    .touch-button {
+      display: none;
+      width: 64px;
+      aspect-ratio: 1;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      background: var(--panel);
+      font-size: 30px;
+      font-weight: 900;
+      pointer-events: auto;
+      user-select: none;
+      backdrop-filter: blur(14px);
+    }
+
+    .credit {
+      justify-self: center;
+      align-self: end;
+      color: rgba(255, 250, 242, 0.72);
+      font-size: 12px;
+      text-align: center;
+      pointer-events: auto;
+    }
+
+    .credit a {
+      color: inherit;
+      text-underline-offset: 3px;
+    }
+
+    @media (max-width: 720px) {
+      .game-shell {
+        min-height: 500px;
+      }
+
+      header {
+        display: grid;
+        grid-template-columns: 1fr;
+        padding-top: 14px;
+      }
+
+      h1 {
+        text-align: center;
+      }
+
+      .hud {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .hud-item {
+        min-width: 0;
+        padding: 7px 8px;
+      }
+
+      .hud-value {
+        font-size: 18px;
+      }
+
+      .touch-button {
+        display: block;
+      }
+
+      .credit {
+        font-size: 11px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="game-shell">
+    <canvas id="gameCanvas" aria-label="옴 콘나팟 똥피하기 게임"></canvas>
+
+    <header>
+      <h1>옴 콘나팟 똥피하기</h1>
+      <section class="hud" aria-label="게임 점수판">
+        <div class="hud-item">
+          <span class="hud-label">점수</span>
+          <span class="hud-value" id="score">0</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label">최고</span>
+          <span class="hud-value" id="best">0</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label">생명</span>
+          <span class="hud-value" id="lives">3</span>
+        </div>
+      </section>
+    </header>
+
+    <section class="stage" aria-live="polite">
+      <div class="overlay" id="overlay">
+        <div class="modal">
+          <img
+            class="portrait"
+            src="https://upload.wikimedia.org/wikipedia/commons/4/4c/Ohm_Thipakorn_2025-05-15.jpg"
+            alt="태국 배우 옴 콘나팟"
+          >
+          <h2 id="overlayTitle">준비됐나요?</h2>
+          <p id="overlayText">떨어지는 똥을 피해 오래 버티세요. 방향키, A/D, 드래그, 좌우 버튼으로 움직일 수 있어요.</p>
+          <button class="primary-button" id="startButton" type="button">시작하기</button>
+        </div>
+      </div>
+    </section>
+
+    <footer class="controls">
+      <button class="touch-button" id="leftButton" type="button" aria-label="왼쪽으로 이동">&#8592;</button>
+      <p class="credit">
+        Image: THHeadline, CC BY 3.0 via
+        <a href="https://commons.wikimedia.org/wiki/File:Ohm_Thipakorn_2025-05-15.jpg" target="_blank" rel="noreferrer">Wikimedia Commons</a>
+      </p>
+      <button class="touch-button" id="rightButton" type="button" aria-label="오른쪽으로 이동">&#8594;</button>
+    </footer>
+  </main>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const scoreEl = document.getElementById("score");
+    const bestEl = document.getElementById("best");
+    const livesEl = document.getElementById("lives");
+    const overlay = document.getElementById("overlay");
+    const overlayTitle = document.getElementById("overlayTitle");
+    const overlayText = document.getElementById("overlayText");
+    const startButton = document.getElementById("startButton");
+    const leftButton = document.getElementById("leftButton");
+    const rightButton = document.getElementById("rightButton");
+
+    const ohmImage = new Image();
+    ohmImage.crossOrigin = "anonymous";
+    ohmImage.src = "https://upload.wikimedia.org/wikipedia/commons/4/4c/Ohm_Thipakorn_2025-05-15.jpg";
+
+    const state = {
+      running: false,
+      gameOver: false,
+      score: 0,
+      best: Number(localStorage.getItem("ohmDodgeBest") || 0),
+      lives: 3,
+      width: 0,
+      height: 0,
+      dpr: 1,
+      lastTime: 0,
+      spawnTimer: 0,
+      spawnEvery: 780,
+      move: 0,
+      pointerActive: false,
+      poop: [],
+      sparkles: [],
+      player: {
+        x: 0,
+        y: 0,
+        radius: 36,
+        speed: 470,
+        invincible: 0
+      }
+    };
+
+    bestEl.textContent = state.best;
+
+    function resize() {
+      state.dpr = Math.min(window.devicePixelRatio || 1, 2);
+      state.width = window.innerWidth;
+      state.height = window.innerHeight;
+      canvas.width = Math.floor(state.width * state.dpr);
+      canvas.height = Math.floor(state.height * state.dpr);
+      canvas.style.width = `${state.width}px`;
+      canvas.style.height = `${state.height}px`;
+      ctx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
+      state.player.radius = Math.max(30, Math.min(46, state.width * 0.075));
+      state.player.y = state.height - Math.max(88, state.player.radius + 42);
+      state.player.x = Math.min(Math.max(state.player.x || state.width / 2, state.player.radius), state.width - state.player.radius);
+    }
+
+    function startGame() {
+      state.running = true;
+      state.gameOver = false;
+      state.score = 0;
+      state.lives = 3;
+      state.spawnTimer = 0;
+      state.spawnEvery = 780;
+      state.poop = [];
+      state.sparkles = [];
+      state.player.x = state.width / 2;
+      state.player.invincible = 900;
+      state.lastTime = performance.now();
+      scoreEl.textContent = "0";
+      livesEl.textContent = "3";
+      overlay.hidden = true;
+      requestAnimationFrame(loop);
+    }
+
+    function endGame() {
+      state.running = false;
+      state.gameOver = true;
+      if (state.score > state.best) {
+        state.best = state.score;
+        localStorage.setItem("ohmDodgeBest", String(state.best));
+        bestEl.textContent = state.best;
+      }
+      overlayTitle.textContent = "게임 종료";
+      overlayText.textContent = `점수 ${state.score}점! 다시 도전해서 옴을 더 오래 지켜주세요.`;
+      startButton.textContent = "다시 시작";
+      overlay.hidden = false;
+    }
+
+    function spawnPoop() {
+      const size = 26 + Math.random() * 22;
+      const speedBoost = Math.min(250, state.score * 2.2);
+      state.poop.push({
+        x: size + Math.random() * (state.width - size * 2),
+        y: -size,
+        size,
+        speed: 180 + Math.random() * 170 + speedBoost,
+        wobble: Math.random() * Math.PI * 2,
+        spin: (Math.random() - 0.5) * 2.4,
+        rotation: 0
+      });
+    }
+
+    function addSparkle(x, y) {
+      for (let i = 0; i < 14; i += 1) {
+        state.sparkles.push({
+          x,
+          y,
+          vx: (Math.random() - 0.5) * 260,
+          vy: (Math.random() - 0.5) * 260,
+          life: 420 + Math.random() * 260,
+          maxLife: 680,
+          color: Math.random() > 0.5 ? "#2dd4bf" : "#ffd166"
+        });
+      }
+    }
+
+    function update(dt) {
+      state.score += Math.floor(dt * 0.018);
+      scoreEl.textContent = state.score;
+      state.spawnEvery = Math.max(260, 780 - state.score * 2.2);
+      state.spawnTimer += dt;
+
+      while (state.spawnTimer > state.spawnEvery) {
+        state.spawnTimer -= state.spawnEvery;
+        spawnPoop();
+      }
+
+      if (state.move !== 0) {
+        state.player.x += state.move * state.player.speed * (dt / 1000);
+      }
+      state.player.x = Math.min(Math.max(state.player.x, state.player.radius), state.width - state.player.radius);
+      state.player.invincible = Math.max(0, state.player.invincible - dt);
+
+      for (const item of state.poop) {
+        item.y += item.speed * (dt / 1000);
+        item.wobble += dt / 260;
+        item.rotation += item.spin * (dt / 1000);
+        item.x += Math.sin(item.wobble) * 0.8;
+      }
+
+      state.poop = state.poop.filter((item) => item.y < state.height + item.size);
+
+      for (const item of state.poop) {
+        const dx = item.x - state.player.x;
+        const dy = item.y - state.player.y;
+        const hitDistance = state.player.radius * 0.74 + item.size * 0.42;
+        if (state.player.invincible <= 0 && Math.hypot(dx, dy) < hitDistance) {
+          item.y = state.height + item.size;
+          state.lives -= 1;
+          livesEl.textContent = state.lives;
+          state.player.invincible = 1150;
+          addSparkle(state.player.x, state.player.y);
+          if (state.lives <= 0) {
+            endGame();
+          }
+          break;
+        }
+      }
+
+      for (const sparkle of state.sparkles) {
+        sparkle.x += sparkle.vx * (dt / 1000);
+        sparkle.y += sparkle.vy * (dt / 1000);
+        sparkle.vy += 220 * (dt / 1000);
+        sparkle.life -= dt;
+      }
+      state.sparkles = state.sparkles.filter((sparkle) => sparkle.life > 0);
+    }
+
+    function drawBackground() {
+      ctx.clearRect(0, 0, state.width, state.height);
+
+      ctx.save();
+      ctx.globalAlpha = 0.22;
+      ctx.fillStyle = "#ffffff";
+      for (let i = 0; i < 34; i += 1) {
+        const x = (i * 137 + state.score * 0.4) % state.width;
+        const y = (i * 89) % state.height;
+        ctx.beginPath();
+        ctx.arc(x, y, 1.2 + (i % 4), 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+
+      const floor = ctx.createLinearGradient(0, state.height - 150, 0, state.height);
+      floor.addColorStop(0, "rgba(255,255,255,0)");
+      floor.addColorStop(1, "rgba(0,0,0,0.28)");
+      ctx.fillStyle = floor;
+      ctx.fillRect(0, state.height - 150, state.width, 150);
+    }
+
+    function drawPlayer() {
+      const player = state.player;
+      const blink = player.invincible > 0 && Math.floor(performance.now() / 95) % 2 === 0;
+
+      ctx.save();
+      ctx.translate(player.x, player.y);
+      ctx.shadowColor = "rgba(0, 0, 0, 0.42)";
+      ctx.shadowBlur = 22;
+      ctx.shadowOffsetY = 12;
+
+      ctx.beginPath();
+      ctx.arc(0, 0, player.radius + 8, 0, Math.PI * 2);
+      ctx.fillStyle = blink ? "rgba(255, 107, 107, 0.72)" : "rgba(45, 212, 191, 0.82)";
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(0, 0, player.radius, 0, Math.PI * 2);
+      ctx.clip();
+
+      if (ohmImage.complete && ohmImage.naturalWidth) {
+        const scale = Math.max((player.radius * 2) / ohmImage.width, (player.radius * 2) / ohmImage.height);
+        const w = ohmImage.width * scale;
+        const h = ohmImage.height * scale;
+        ctx.drawImage(ohmImage, -w / 2, -h / 2, w, h);
+      } else {
+        ctx.fillStyle = "#111827";
+        ctx.fillRect(-player.radius, -player.radius, player.radius * 2, player.radius * 2);
+        ctx.fillStyle = "#fffaf2";
+        ctx.font = `900 ${player.radius * 0.58}px sans-serif`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("OHM", 0, 2);
+      }
+      ctx.restore();
+
+      ctx.save();
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.82)";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, player.radius + 1.5, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawPoop() {
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      for (const item of state.poop) {
+        ctx.save();
+        ctx.translate(item.x, item.y);
+        ctx.rotate(item.rotation);
+        ctx.font = `${item.size}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
+        ctx.fillText("💩", 0, 0);
+        ctx.restore();
+      }
+    }
+
+    function drawSparkles() {
+      for (const sparkle of state.sparkles) {
+        const alpha = Math.max(0, sparkle.life / sparkle.maxLife);
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = sparkle.color;
+        ctx.beginPath();
+        ctx.arc(sparkle.x, sparkle.y, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    function draw() {
+      drawBackground();
+      drawPoop();
+      drawSparkles();
+      drawPlayer();
+    }
+
+    function loop(now) {
+      if (!state.running) {
+        draw();
+        return;
+      }
+      const dt = Math.min(32, now - state.lastTime);
+      state.lastTime = now;
+      update(dt);
+      draw();
+      if (state.running) {
+        requestAnimationFrame(loop);
+      }
+    }
+
+    function setPointerPosition(clientX) {
+      state.player.x = Math.min(Math.max(clientX, state.player.radius), state.width - state.player.radius);
+    }
+
+    window.addEventListener("resize", resize);
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowLeft" || event.key.toLowerCase() === "a") {
+        state.move = -1;
+      }
+      if (event.key === "ArrowRight" || event.key.toLowerCase() === "d") {
+        state.move = 1;
+      }
+      if ((event.key === " " || event.key === "Enter") && !state.running) {
+        startGame();
+      }
+    });
+
+    window.addEventListener("keyup", (event) => {
+      if ((event.key === "ArrowLeft" || event.key.toLowerCase() === "a") && state.move < 0) {
+        state.move = 0;
+      }
+      if ((event.key === "ArrowRight" || event.key.toLowerCase() === "d") && state.move > 0) {
+        state.move = 0;
+      }
+    });
+
+    window.addEventListener("pointerdown", (event) => {
+      state.pointerActive = true;
+      setPointerPosition(event.clientX);
+    });
+
+    window.addEventListener("pointermove", (event) => {
+      if (state.pointerActive) {
+        setPointerPosition(event.clientX);
+      }
+    });
+
+    window.addEventListener("pointerup", () => {
+      state.pointerActive = false;
+    });
+
+    leftButton.addEventListener("pointerdown", (event) => {
+      event.stopPropagation();
+      state.move = -1;
+    });
+    rightButton.addEventListener("pointerdown", (event) => {
+      event.stopPropagation();
+      state.move = 1;
+    });
+    leftButton.addEventListener("pointerup", () => {
+      state.move = 0;
+    });
+    rightButton.addEventListener("pointerup", () => {
+      state.move = 0;
+    });
+    leftButton.addEventListener("pointerleave", () => {
+      state.move = 0;
+    });
+    rightButton.addEventListener("pointerleave", () => {
+      state.move = 0;
+    });
+
+    startButton.addEventListener("click", startGame);
+
+    resize();
+    draw();
+  </script>
+</body>
+</html>
